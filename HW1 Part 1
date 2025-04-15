@@ -1,0 +1,59 @@
+% Part A
+% Define the ODE function for fluid height
+function dhdt = odefun(t, h, Q_in, R, C_d, A_d, g)
+   dhdt = (1 / (pi * R^2)) * (Q_in - C_d * A_d * sqrt(2 * g * h));
+end
+
+% Variables
+R = 1.2;
+C_d = 0.7;
+g = 9.81;
+d = 0.07;
+A_d = pi * (d^2) / 4;
+T_max = 1500;
+h0 = 0;
+Qin_values = [0.005, 0.01, 0.015];
+tspan = [0 T_max];
+
+figure;
+hold on;
+
+% Loop for each Q_in values
+for i = 1:length(Qin_values)
+   Q_in = Qin_values(i);
+  
+   % ode45
+   [t, h] = ode45(@(t, h) odefun(t, h, Q_in, R, C_d, A_d, g), tspan, h0);
+  
+   h_num_values(i) = h(end);
+
+   % Plot
+   plot(t, h, 'LineWidth', 1.5, 'DisplayName', ['Q_in = ', num2str(Q_in), ' m^3/s']);
+end
+
+% Labels
+xlabel('Time (s)');
+ylabel('Fluid Height (m)');
+legend('show', 'Location', 'best');
+title('Fluid Height vs Time for Different Inflow Rates');
+grid on;
+
+% Part B
+
+% Loop to compare h_num and h_inf
+for i = 1:length(Qin_values)
+    Q_in = Qin_values(i);
+    
+    % Theoretical
+    h_inf_val = h_inf(Q_in);
+    
+    % Numerical
+    h_num = h_num_values(i);
+    
+    % Relative error
+    E_R = abs(h_num - h_inf_val) / h_inf_val;
+    
+    % Display
+    fprintf('Q_in = %.3f m^3/s: Theoretical h_inf = %.3f m, Numerical h_num = %.3f m, Relative Error = %.5f\n', ...
+        Q_in, h_inf_val, h_num, E_R);
+end
