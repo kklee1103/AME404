@@ -1,0 +1,40 @@
+% Define constants
+R = 3;
+Q_in_values = [0.025, 0.05, 0.075];
+h0 = 1e-6;
+h_max = 2 * R;
+tspan = [0 5000];
+
+% Define ODE function
+odefun = @(t, h, Q_in) (Q_in ./ (pi * h .* (2 * R - h)));
+
+figure;
+hold on;
+
+% Loop over  inflow rates
+for i = 1:length(Q_in_values)
+    Q_in = Q_in_values(i);
+    
+    % ode45
+    [t, h] = ode45(@(t, h) odefun(t, h, Q_in), tspan, h0);
+    
+    % Stop integrating when reached h_max
+    h(h > h_max) = h_max;
+    
+    % Plot
+    plot(t, h, 'LineWidth', 1.5, 'DisplayName', ['Q_{_in} = ', num2str(Q_in), ' m^3/s']);
+    
+    % Theoretical filling time
+    t_theoretical = (4 * pi * R^3) / (3 * Q_in);
+    
+    % Display
+    fprintf('For Q_in = %.3f m^3/s. Theoretical filling time = %.2f s\n', Q_in, t_theoretical);
+end
+
+% Add labels and title
+xlabel('Time (s)');
+ylabel('Water Height (m)');
+legend('show', 'Location', 'best');
+title('Water Height in a Spherical Tank vs Time for Different Inflow Rates');
+grid on;
+hold off;
