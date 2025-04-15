@@ -1,0 +1,74 @@
+% Constants for A-4 Skyhawk at Mach 0.4 (low speed)
+Xu_04 = -0.03;  % Replace with correct values from handout
+Xalpha_04 = -0.35;
+Zu_04 = -0.28;
+Zalpha_04 = -0.55;
+Zq_04 = -0.85;
+Malpha_04 = -0.65;
+Mq_04 = -1.15;
+U0_04 = 120;    % Mach 0.4 corresponds to a certain airspeed
+
+% Repeat the same for Mach 0.8 (transonic speed)
+Xu_08 = -0.04;  % Replace with correct values from handout
+Xalpha_08 = -0.38;
+Zu_08 = -0.30;
+Zalpha_08 = -0.60;
+Zq_08 = -0.90;
+Malpha_08 = -0.70;
+Mq_08 = -1.20;
+U0_08 = 240;    % Mach 0.8 corresponds to a certain airspeed
+
+% Time span for the simulation
+t_span = [0 200];
+
+% Initial conditions
+initial_conditions = [1.0; 0.1; 0.2; 0];
+
+% Define delta_e for free response (set to zero)
+delta_e_zero = @(t) 0;
+
+% System of ODEs for Mach 0.4
+[t_04, y_04] = ode45(@(t, y) airplane_dynamics(t, y, delta_e_zero, Xu_04, Xalpha_04, Zu_04, Zalpha_04, Zq_04, Malpha_04, Mq_04, g, U0_04), t_span, initial_conditions);
+
+% System of ODEs for Mach 0.8
+[t_08, y_08] = ode45(@(t, y) airplane_dynamics(t, y, delta_e_zero, Xu_08, Xalpha_08, Zu_08, Zalpha_08, Zq_08, Malpha_08, Mq_08, g, U0_08), t_span, initial_conditions);
+
+% Eigenvalue analysis for Mach 0.4
+A_04 = [Xu_04, Xalpha_04, -g, 0;
+        Zu_04/U0_04, Zalpha_04/U0_04, 0, (1 + Zq_04/U0_04);
+        0, 0, 0, 1;
+        Malpha_04/U0_04, Mq_04/U0_04, 0, 0]; 
+
+eigenvalues_04 = eig(A_04); 
+
+% Eigenvalue analysis for Mach 0.8
+A_08 = [Xu_08, Xalpha_08, -g, 0;
+        Zu_08/U0_08, Zalpha_08/U0_08, 0, (1 + Zq_08/U0_08);
+        0, 0, 0, 1;
+        Malpha_08/U0_08, Mq_08/U0_08, 0, 0]; 
+
+eigenvalues_08 = eig(A_08);
+
+% Display the eigenvalues and check stability for Mach 0.4
+fprintf('Eigenvalues for Mach 0.4: \n');
+disp(eigenvalues_04);
+fprintf('System Stability for Mach 0.4: \n');
+stability_04 = real(eigenvalues_04);
+is_stable_04 = all(stability_04 < 0);
+if is_stable_04
+    disp('The system is stable (all eigenvalues have negative real parts).');
+else
+    disp('The system is unstable (some eigenvalues have positive real parts).');
+end
+
+% Display the eigenvalues and check stability for Mach 0.8
+fprintf('Eigenvalues for Mach 0.8: \n');
+disp(eigenvalues_08);
+fprintf('System Stability for Mach 0.8: \n');
+stability_08 = real(eigenvalues_08);
+is_stable_08 = all(stability_08 < 0);
+if is_stable_08
+    disp('The system is stable (all eigenvalues have negative real parts).');
+else
+    disp('The system is unstable (some eigenvalues have positive real parts).');
+end
