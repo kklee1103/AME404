@@ -1,0 +1,59 @@
+function airplane_simulation
+    % Define the time span
+    tspan = [0 200]; % 0 to 200 seconds
+
+    % Initial conditions for part 1
+    u0 = 0; 
+    alpha0 = 0; 
+    theta0 = 0;
+    q0 = 0;
+    initial_conditions = [u0; alpha0; theta0; q0];
+
+    % Solve the system of ODEs using ode45
+    [t, y] = ode45(@airplane_dynamics, tspan, initial_conditions);
+    
+    % Plot the results
+    figure;
+    plot(t, y(:, 1), 'r', 'DisplayName', 'u'); hold on;
+    plot(t, y(:, 2), 'g', 'DisplayName', 'alpha');
+    plot(t, y(:, 3), 'b', 'DisplayName', 'theta');
+    plot(t, y(:, 4), 'k', 'DisplayName', 'q');
+    xlabel('Time (s)');
+    ylabel('Response');
+    legend;
+    title('Longitudinal motion of a commercial airplane');
+    
+    % Function defining the dynamics of the airplane
+    function dydt = airplane_dynamics(t, y)
+        % Extract variables
+        u = y(1); 
+        alpha = y(2); 
+        theta = y(3);
+        q = y(4);
+
+        % Constants (need to fill in based on the provided data)
+        g = 9.81;  % Gravity
+        U0 = 1.0;  % Reference speed (example)
+        X_u = -0.02; % Example coefficient
+        X_alpha = 0.05; % Example coefficient
+        M_q = -0.01; % Example coefficient
+        Z_alpha = -0.3; % Example coefficient
+        % Fill in the actual aerodynamic coefficients based on the problem
+
+        % Control input (elevator deflection)
+        if t > 0
+            delta_e = 0.1;
+        else
+            delta_e = 0;
+        end
+
+        % Define the equations based on the given system
+        du_dt = X_u * u + X_alpha * alpha - g * theta;
+        dalpha_dt = Z_alpha * u + alpha + q + delta_e / U0;
+        dq_dt = M_q * q + delta_e / U0;
+        dtheta_dt = q;
+
+        % Return the derivative of the state
+        dydt = [du_dt; dalpha_dt; dtheta_dt; dq_dt];
+    end
+end
